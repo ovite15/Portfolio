@@ -1,0 +1,159 @@
+---
+output:
+  html_notebook: default
+  html_document: default
+---
+## **Mini Project 01- IMDB web scraping** 
+
+```{r}
+library(tidyverse)
+library(rvest) #scrape data from internet
+```
+
+```{r}
+url <- "https://www.imdb.com/search/title/?groups=top_100&sort=user_rating,desc"
+
+```
+
+```{r}
+#read html
+imdb <- read_html(url)
+
+```
+
+```{r}
+imdb
+
+```
+
+```{r}
+# movie title 
+titles <- imdb %>% 
+  html_nodes("h3.lister-item-header")%>%
+  html_text2() 
+
+```
+
+```{r}
+#rating 
+ratings <- imdb %>%
+  html_nodes("div.ratings-imdb-rating")%>%
+  html_text2() %>% as.numeric()
+
+```
+
+```{r}
+ratings[1:10]
+
+```
+
+```{r}
+num_votes <- imdb%>%
+  html_nodes("p.sort-num_votes-visible") %>%
+  html_text2()
+
+
+```
+
+```{r}
+num_votes
+
+```
+
+```{r}
+# build a data set
+df_imdb <- data.frame(
+  title = titles,
+  rating = ratings,
+  num_vote = num_votes
+)
+
+```
+
+```{r}
+print(df_imdb)
+
+```
+
+# **Mini Project 02 - Phone Database**
+
+
+```{r}
+library(tidyverse)
+library(rvest) # scrape data from internet
+
+```
+
+```{r}
+url <- read_html("https://specphone.com/Samsung-Galaxy-S23-Plus-5G.html")
+
+```
+
+```{r}
+att <- url %>% 
+  html_nodes("div.topic") %>% 
+  html_text2()
+
+detail <- url %>%
+  html_nodes("div.detail") %>%
+  html_text2()
+```
+
+```{r}
+df <- data.frame(attribute = att, value = detail)
+```
+
+```{r}
+df
+```
+
+```{r}
+# All Sumsung smartphone
+sumsung_url <- read_html("https://specphone.com/brand/Samsung")
+```
+
+```{r}
+# link to all sumsung 
+links <- sumsung_url %>%
+  html_nodes("li.mobile-brand-item a") %>%html_attr("href")
+
+```
+
+```{r}
+full_links <- paste0("https://specphone.com",links)
+
+```
+
+```{r}
+result <- data.frame()
+for(link in full_links[1:10]){
+    ss_topic <- link %>%
+      read_html %>%
+      html_nodes("div.topic") %>%
+      html_text2()
+    ss_detail <- link %>%
+      read_html %>%
+      html_nodes("div.detail")%>%
+      html_text2()
+    
+    tmp <- data.frame(attribute = ss_topic,    value = ss_detail)
+    
+    result <- bind_rows(result, tmp)
+    print("Progress...")
+    
+}
+print(result)
+
+```
+
+```{r}
+## write CSV 
+write_csv(result, "result_ss_phone.csv")
+```
+
+```{r}
+
+```
+
+
+
